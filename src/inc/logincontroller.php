@@ -3,6 +3,7 @@ require_once(dirname(__FILE__)."/../root.php");
 require_once(__ROOT__."/settings.php");
 require_once(__ROOT__."/inc/commons/url.php");
 require_once(__ROOT__."/inc/db_users.php");
+require_once(__ROOT__."/inc/compatibility.php");
 
 $loginController = new LoginController();
 
@@ -44,13 +45,13 @@ class LoginController
 		$result = "";
 		switch($errorCode){
 			case -1:
-				$result = base64_encode("User does not exist.");
+				$result = base64_encode("Invalid credentials");//"User does not exist.");
 				break;
 			case -2:
-				$result = base64_encode("Incorrect password.");
+				$result = base64_encode("Invalid credentials");//"Incorrect password.");
 				break;
 			case -3:
-				$result = base64_encode("This user is currently disabled.");
+				$result = base64_encode("Invalid credentials");//"This user is currently disabled.");
 				break;
 		}
 		$location = UrlUtils::CurrentUrl(Settings::$SiteRoot."?specialType=logon&result=$result");
@@ -88,7 +89,7 @@ class LoginController
 		$udb = new UserDb();
 		$user = null;
 
-		$ar = $udb->Query("(UserId eq '".$uid."' or Email eq '".$uid."')");		
+		$ar = $udb->Query("(UserId eq '".$uid."' or Email eq '".$uid."')");
 		$errorCode = 0;
 			
 		if(sizeof($ar)==1){
