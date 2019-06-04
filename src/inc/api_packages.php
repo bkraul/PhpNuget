@@ -71,9 +71,9 @@ class PackagesApi extends SmallTextDbApiBase
 		
 		
 		if(!$loginController->Admin){
-			if($user->Id!=$old->UserId){
+			//if($user->Id!=$old->UserId){
 				throw new Exception("Operation not allowed with current rights!");
-			}
+			//}
 		}
 	}	
 	
@@ -213,7 +213,7 @@ class PackagesApi extends SmallTextDbApiBase
 			$parsedNuspec = $nugetReader->LoadNuspecFromFile($tempFile);
 			
 			$parsedNuspec->UserId=$user->Id;
-			$nuspecData = $nugetReader->SaveNuspec($tempFile,$parsedNuspec);
+			$nugetReader->SaveNuspec($tempFile,$parsedNuspec);
 		}catch(Exception $ex){
 			if(file_exists($tempFile))
 			unlink($tempFile);
@@ -225,6 +225,7 @@ class PackagesApi extends SmallTextDbApiBase
 	
 	public function docountpackagestorefresh()
 	{
+        $result =0;
 		try{
 			$this->_preExecute();
 			global $loginController;
@@ -237,7 +238,7 @@ class PackagesApi extends SmallTextDbApiBase
 			$message = $result ;
 			ApiBase::ReturnSuccess($message);
 		}catch(Exception $ex){
-			$message = "Refreshed ".$i." packages over ".sizeof($results).".";
+			$message = "Refreshed only ".$result." files.";
 			ApiBase::ReturnError($message."\r\n".$ex->getMessage(),500);
 		}
 	}
@@ -298,8 +299,7 @@ class PackagesApi extends SmallTextDbApiBase
 			$parsedNuspec = $nugetReader->LoadNuspecFromFile($file);
 			$r->Id= $parsedNuspec->Id;
 			$r->Version= $parsedNuspec->Version;
-			
-			$pathInfo = basename($file);
+
 			$realPath = Path::Combine(Settings::$PackagesRoot,$r->Id.".".$r->Version.".nupkg");
 			if($realPath!=$file){
 				if(file_exists($realPath) && DIRECTORY_SEPARATOR == '/'){
@@ -310,7 +310,7 @@ class PackagesApi extends SmallTextDbApiBase
 			}
 			
 			$parsedNuspec->UserId=$userId;
-			$nuspecData = $nugetReader->SaveNuspec($file,$parsedNuspec);
+			$nugetReader->SaveNuspec($file,$parsedNuspec);
 		}catch(Exception $ex){
 			$r->Success = false;
 			$r->Reason = $ex->getMessage();
