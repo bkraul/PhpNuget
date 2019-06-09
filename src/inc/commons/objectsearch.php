@@ -359,7 +359,7 @@ class ObjectSearch
 				
 			$v = strtolower($o->Value);
 			$t = strtolower($o->Type);
-			if($v==$operator){
+			if($v==$operator && $t!="string" ){
 				//Seek last logical operator
 				$popped = array_pop($andResult);
 				$lastEnd = $i;
@@ -428,24 +428,7 @@ class ObjectSearch
 		$identified = $this->_subRenderLogicalOperators($identified,"or",-1);
 
 
-		for($i=0;$i<sizeof($identified);$i++){
-            $o = $identified[$i];
-            $t = strtolower($o->Type);
-            $v = $o->Value;
-            if($t=="function" && $this->_isBinary(str_ireplace("do","",$v))) {
 
-                if("function" ==$o->Children[0]->Type && sizeof($o->Children[0]->Children)==1 && $this->_isField($o->Children[0]->Children[0]->Value)){
-                    //echo "_".$o->Children[0]->Type."_".$v."\r\n";
-
-                    $functionCall = $o->Children[0];
-                    $realField = $o->Children[0]->Children[0];
-                    $fieldValue = $o->Children[1];
-                    $o->Children[0] = $realField;
-                    $functionCall->Children[0]=$fieldValue;
-                    $o->Children[1] = $functionCall;
-                }
-            }
-        }
 		return $identified;
 	}
 	
@@ -539,7 +522,7 @@ class ObjectSearch
 		}else if($this->externalTypes!=null && $this->externalTypes->IsExternal($v)){
 			return $parseTreeItem;
 		}else{
-			throw new ParserException("Token '".$t."' not supported excuting");
+			throw new ParserException("Token '".$t."' not supported excuting (1)");
 		}
 		return $result;
 	}
@@ -611,7 +594,7 @@ class ObjectSearch
 			for($i=0;$i<sizeof($c);$i++){
 				$params[] = $this->_doExecute($c[$i],$subject);
 			}
-			
+
 			$result = $this->_executeFunction($v,$params);
 		}else if($t == "group"){
 			$params = array();
@@ -629,7 +612,7 @@ class ObjectSearch
 		}else if($this->externalTypes!=null && $this->externalTypes->IsExternal($v)){
 			return $parseTreeItem;
 		}else{
-			throw new ParserException("Token '".$t."' not supported excuting");
+			throw new ParserException("Token '".$t."' not supported excuting (2)");
 		}
 		return $result;
 	}
@@ -713,15 +696,15 @@ class ObjectSearch
 			return BuildBool(true);
 		} 
 	}
-	
+
 	function doeq($args)
 	{
 		$l=$args[0];
 		$r=$args[1];
 
 		if($l->Type=="string" || $r->Type=="string"){
-		    return BuildBool(strtolower($l->Value)==strtolower($r->Value));
-        }
+			return BuildBool(strtolower($l->Value)==strtolower($r->Value));
+		}
 
 		return BuildBool($l->Value == $r->Value);
 	}
